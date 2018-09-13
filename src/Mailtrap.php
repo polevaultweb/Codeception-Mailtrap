@@ -169,16 +169,37 @@ class Mailtrap extends Module
     }
 
     /**
-     * Check if the latest email received is from $senderEmail.
-     *
-     * @param $senderEmail
+     * @param $expected
+     * @param $actual
      *
      * @return mixed
      */
-    public function receiveAnEmailFromEmail($senderEmail)
+    protected function assertEquals($expected, $actual)
     {
-        $message = $this->fetchLastMessage();
-        $this->assertEquals($senderEmail, $message['from_email']);
+        $constraint = Assert::equalTo($expected);
+
+        return $constraint->evaluate($actual, '', false);
+    }
+
+    /**
+     * Check if the latest email received is from $senderEmail.
+     *
+     * @param string
+     * @param int $numberOfMessages
+     *
+     * @return mixed
+     */
+    public function receiveAnEmailFromEmail($senderEmail, $numberOfMessages = 1 )
+    {
+        $messages = $this->fetchLastMessages( $numberOfMessages );
+        $messageExists = false;
+        foreach ( $messages as $message ) {
+            if ( $this->assertEquals($senderEmail, $message['from_email'])) {
+                $messageExists = true;
+            }
+        }
+
+        $this->assertTrue($messageExists);
     }
 
     /**
